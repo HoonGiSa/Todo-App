@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tasks - 할 일 관리</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <main class="todo-card">
+      <!-- 0. 헤더 & 테마 토글 스위치 -->
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="header-titles">
+            <h1 class="app-title">My Tasks</h1>
+            <p class="app-subtitle">오늘 할 일을 깔끔하게 관리해보세요</p>
+          </div>
+          <!-- 테마 토글 버튼 (우측 상단) -->
+          <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="다크/라이트 모드 전환" title="다크/라이트 모드 전환">
+            <span id="theme-icon" class="theme-icon">🌙</span>
+            <span id="theme-label" class="theme-label">다크 모드</span>
+          </button>
+        </div>
+
+        <!-- 남은 할 일 개수 배지 & 단축키 안내 힌트 -->
+        <div class="header-badges-row">
+          <span id="pending-badge" class="pending-badge">남은 할 일 <strong>0</strong>개</span>
+          <span class="shortcut-tip" title="Alt+N: 입력창, Alt+1~4: 필터 전환">
+            <kbd>Alt+N</kbd> 입력 &nbsp;<kbd>Alt+1~4</kbd> 필터
+          </span>
+        </div>
+      </header>
+
+      <!-- 1. 진행률 대시보드 섹션 -->
+      <section class="dashboard-section" aria-label="진행률 대시보드">
+        <div class="progress-header">
+          <span class="progress-title">전체 진행률</span>
+          <span id="progress-text" class="progress-text">0/0 완료 (0%)</span>
+        </div>
+        <div class="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+        </div>
+
+        <!-- 메타 통계 (오늘 추가된 개수) & 카테고리별 미니 진행률 -->
+        <div class="dashboard-meta">
+          <div class="today-badge">
+            <span class="today-icon">📅</span>
+            <span>오늘 추가: <strong id="today-count">0</strong>개</span>
+          </div>
+          
+          <div class="mini-progress-grid">
+            <div class="mini-stat mini-work">
+              <div class="mini-stat-header">
+                <span class="mini-dot dot-work"></span>
+                <span class="mini-name">업무</span>
+                <span id="stat-work-text" class="mini-count">0/0</span>
+              </div>
+              <div class="mini-bar-bg">
+                <div id="mini-bar-work" class="mini-bar-fill bar-work" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="mini-stat mini-personal">
+              <div class="mini-stat-header">
+                <span class="mini-dot dot-personal"></span>
+                <span class="mini-name">개인</span>
+                <span id="stat-personal-text" class="mini-count">0/0</span>
+              </div>
+              <div class="mini-bar-bg">
+                <div id="mini-bar-personal" class="mini-bar-fill bar-personal" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="mini-stat mini-study">
+              <div class="mini-stat-header">
+                <span class="mini-dot dot-study"></span>
+                <span class="mini-name">공부</span>
+                <span id="stat-study-text" class="mini-count">0/0</span>
+              </div>
+              <div class="mini-bar-bg">
+                <div id="mini-bar-study" class="mini-bar-fill bar-study" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 유틸리티 바: 실시간 검색 & 정렬 옵션 & 데이터 내보내기/가져오기 -->
+      <section class="utility-section">
+        <!-- 검색창 -->
+        <div class="search-box-wrapper">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="할 일 검색... (실시간 필터링)" 
+            aria-label="할 일 검색"
+            autocomplete="off"
+          >
+          <button type="button" id="search-clear-btn" class="search-clear-btn" aria-label="검색어 지우기" style="display: none;">&times;</button>
+        </div>
+
+        <!-- 정렬 및 데이터 관리 액션 바 -->
+        <div class="control-bar">
+          <div class="sort-wrapper">
+            <label for="sort-select" class="sort-label">정렬:</label>
+            <select id="sort-select" class="sort-select" aria-label="정렬 기준">
+              <option value="created-desc">최신 등록순</option>
+              <option value="created-asc">오래된 등록순</option>
+              <option value="category">카테고리순</option>
+              <option value="status">미완료 우선순</option>
+              <option value="custom">사용자 지정 (드래그)</option>
+            </select>
+          </div>
+
+          <div class="data-actions">
+            <button type="button" id="export-btn" class="btn-utility" title="데이터를 JSON 파일로 백업 내보내기">
+              💾 내보내기
+            </button>
+            <button type="button" id="import-btn" class="btn-utility" title="JSON 백업 파일에서 데이터 가져오기">
+              📂 가져오기
+            </button>
+            <input type="file" id="import-file-input" accept=".json" style="display: none;" aria-hidden="true">
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 상단 카테고리 필터 버튼 그룹 -->
+      <nav class="filter-nav" aria-label="카테고리 필터">
+        <button type="button" class="filter-btn active" data-filter="all" title="단축키: Alt+1">
+          전체 <span class="filter-shortcut">1</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="work" title="단축키: Alt+2">
+          <span class="filter-dot dot-work"></span>업무 <span class="filter-shortcut">2</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="personal" title="단축키: Alt+3">
+          <span class="filter-dot dot-personal"></span>개인 <span class="filter-shortcut">3</span>
+        </button>
+        <button type="button" class="filter-btn" data-filter="study" title="단축키: Alt+4">
+          <span class="filter-dot dot-study"></span>공부 <span class="filter-shortcut">4</span>
+        </button>
+      </nav>
+
+      <!-- 4. 할 일 입력 폼 (카테고리 드롭다운 + 인풋 + 추가 버튼 + 자동 감지 힌트) -->
+      <div class="input-form-container">
+        <form id="todo-form" class="todo-form" autocomplete="off">
+          <select id="todo-category" class="todo-category-select" aria-label="카테고리 선택">
+            <option value="work">업무</option>
+            <option value="personal" selected>개인</option>
+            <option value="study">공부</option>
+          </select>
+          <input 
+            type="text" 
+            id="todo-input" 
+            class="todo-input" 
+            placeholder="새로운 할 일을 입력하세요... (Alt+N)" 
+            aria-label="새로운 할 일"
+            required
+          >
+          <button type="submit" id="add-btn" class="btn-add" aria-label="할 일 추가">추가</button>
+        </form>
+        
+        <!-- 키워드 기반 자동 감지 힌트 배지 -->
+        <div id="category-hint" class="category-hint" style="display: none;">
+          <span class="hint-icon">✨</span>
+          <span id="hint-text" class="hint-text">키워드 감지됨</span>
+        </div>
+      </div>
+
+      <!-- 5. 할 일 목록 영역 (드래그 앤 드롭 지원) -->
+      <section class="todo-list-container">
+        <ul id="todo-list" class="todo-list" aria-live="polite"></ul>
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <p id="empty-message">할 일이 없습니다. 추가해보세요!</p>
+          <span id="empty-hint" class="empty-hint">위 입력창에서 새로운 할 일을 등록하거나 검색어를 변경해보세요.</span>
+        </div>
+      </section>
+
+      <!-- 6. 푸터: 카운터 & 완료된 항목 모두 삭제 버튼 -->
+      <footer class="app-footer">
+        <div class="footer-left">
+          <span id="task-counter" class="task-counter">총 0개 할 일</span>
+          <span id="filter-status" class="filter-status">전체 보기</span>
+        </div>
+        <button type="button" id="clear-completed-btn" class="btn-clear-completed" aria-label="완료된 항목 모두 삭제">
+          완료 항목 모두 삭제
+        </button>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

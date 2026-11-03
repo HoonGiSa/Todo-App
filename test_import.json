@@ -1,0 +1,23 @@
+[
+  {
+    "id": "imported_1",
+    "text": "인공지능 모델 미세조정(Fine-tuning) 실습",
+    "category": "study",
+    "completed": false,
+    "createdAt": 1730600000000
+  },
+  {
+    "id": "imported_2",
+    "text": "팀 주간 회의 자료 취합 및 배포",
+    "category": "work",
+    "completed": true,
+    "createdAt": 1730601000000
+  },
+  {
+    "id": "imported_3",
+    "text": "주말 등산 준비물 챙기기",
+    "category": "personal",
+    "completed": false,
+    "createdAt": 1730602000000
+  }
+]
